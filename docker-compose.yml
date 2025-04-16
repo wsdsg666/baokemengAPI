@@ -1,0 +1,43 @@
+
+version: '3.7'
+
+services:
+  db:
+    build: ./db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: pokemon
+      MYSQL_PASSWORD: 123456
+      MYSQL_DATABASE: pokemon
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: pokemon
+      MYSQL_PASSWORD: 123456
+      MYSQL_DATABASE: pokemon
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./public/images/pokemon:/app/public/images/pokemon  # 只挂载宝可梦图片目录
+
+volumes:
+  mysql_data:
+  redis_data:
